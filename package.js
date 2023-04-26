@@ -1,19 +1,18 @@
 Package.describe({
   name: 'zodern:cdn',
-  version: '1.4.0',
+  version: '2.0.0',
   summary: 'Serve Meteor content from a CDN',
   git: 'https://github.com/zodern/meteor-cdn',
   documentation: 'README.md'
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.4');
+  api.versionsFrom('2.3');
   api.export('CDN','server');
   api.export('CDN','client');
   api.use('webapp','server');
-  api.use('templating','client');
   api.use('browser-policy', {weak: true});
-  api.addFiles('lib/template.js','client');
+  api.use('ecmascript');
   api.addFiles('lib/client.js','client');
   api.addFiles('lib/server.js','server');
 });
