@@ -10,24 +10,31 @@ on:
   pull_request:
 
 jobs:
-  tests:
-    name: tests
+  test:
     runs-on: ubuntu-latest
-    # needs: [lintcode,lintstyle,lintdocs] # we could add prior jobs for linting, if desired
+    strategy:
+      matrix:
+        meteorRelease:
+          - '--release 1.12.1'
+          - '--release 2.3.5'
+          - '--release 2.8.1'
+          # Latest version
+          -
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Setup meteor
-        uses: meteorengineer/setup-meteor@v1
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          meteor-release: '2.8.0'
+          node-version: '14.x'
 
-      - name: cache dependencies
-        uses: actions/cache@v1
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: meteor test-packages ./ --once
+      - name: Install Dependencies
+        run: |
+          curl https://install.meteor.com | /bin/sh
+          npm i -g @zodern/mtest
+
+      - name: Run Tests
+        run: |
+          # Retry tests since some of them are flaky
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || mtest --package ./ --once ${{ matrix.meteorRelease }} 
