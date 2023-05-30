@@ -30,4 +30,4 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: meteor test-packages ./ --once --tests-in-console
+      - run: meteor test-packages ./ --once
