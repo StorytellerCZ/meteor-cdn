@@ -135,27 +135,15 @@ CDN works perfectly with MDG Galaxy. Setup instructions:
 
 The ROOT_URL and CDN_URL environment variables can be set from settings.json
 
-```javascript
+```json
 // Settings.json
 {
-  "galaxy.meteor.com"
-:
-  {
-    "env"
-  :
-    {
-      "ROOT_URL"
-    :
-      "https://www.mydomain.com",
-        "CDN_URL"
-    :
-      "https://xyz.cloudfront.net",
-        "MONGO_URL"
-    :
-      "...",
-        "MONGO_OPLOG_URL"
-    :
-      "..."
+  "galaxy.meteor.com": {
+    "env": {
+      "ROOT_URL": "https://www.mydomain.com",
+      "CDN_URL": "https://xyz.cloudfront.net",
+      "MONGO_URL": "...",
+      "MONGO_OPLOG_URL": "..."
     }
   }
 }
