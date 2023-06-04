@@ -304,7 +304,7 @@ Tinytest.add(
       req.url = fonts[i];
       res.headers = {};
       res.nextCalls = nextCalls;
-      CONTROLLER._CORSconnectHandler(req,res,next);
+      CONTROLLER._CORSConnectHandler(req,res,next);
       test.equal(res.status,200);
       test.equal(nextCalls-res.nextCalls,1);
       test.equal(res.headers['Strict-Transport-Security'],'max-age=2592000; includeSubDomains','Missing STS Header')
@@ -336,7 +336,7 @@ Tinytest.add(
     req.headers.host = url.parse(cdn).host;
     res.headers = {};
 
-    CONTROLLER._CORSconnectHandler(req,res,next);
+    CONTROLLER._CORSConnectHandler(req,res,next);
     test.equal(res.headers['Strict-Transport-Security'],'max-age=2592000; includeSubDomains','Missing STS Header')
     test.equal(res.headers['Access-Control-Allow-Origin'], '*', 'Missing ACAO Header');
     resetState()
@@ -363,7 +363,7 @@ Tinytest.add(
     req.headers.host = url.parse(cdn).host;
     res.headers = {};
 
-    CONTROLLER._CORSconnectHandler(req,res,next);
+    CONTROLLER._CORSConnectHandler(req,res,next);
     test.equal(res.headers['Strict-Transport-Security'], undefined, 'Extra STS Header');
     test.equal(res.headers['Access-Control-Allow-Origin'], undefined, 'Extra ACAO Header');
     resetState()

@@ -65,7 +65,7 @@ if (Meteor.isProduction) {
       "/someicons/changingIcon.png": { "cache-control": "public, max-age: 100" },
       // This folder contains subfolders and files under them
       "/staticassets/": { "cache-control": "public, max-age: 5000" },
-    };
+    }
   });
 }
 ```
@@ -103,24 +103,16 @@ storyteller:cdn is compatible with most production setups.
 When serving your app with mup the ROOT_URL and CDN_URL environment variables can be set from mup.json. See
 the [meteor-cdn demo](https://github.com/NitroLabs/meteor-cdn-demo/) on Github for more details.
 
-```js
+```json
 // mup.json
 {
   // Normal mup settings
   // ...
   // Configure environment
-  "env"
-:
-  {
-    "PORT"
-  :
-    80,
-      "CDN_URL"
-  :
-    "http://d3k17ze63872d4.cloudfront.net",
-      "ROOT_URL"
-  :
-    "http://www.mysite.com"
+  "env": {
+    "PORT": 80,
+    "CDN_URL": "http://d3k17ze63872d4.cloudfront.net",
+    "ROOT_URL": "http://www.mysite.com"
   }
 }
   ```

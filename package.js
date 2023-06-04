@@ -1,8 +1,8 @@
 Package.describe({
   name: 'storyteller:cdn',
-  version: '2.0.0',
+  version: '2.0.1',
   summary: 'Serve Meteor content from a CDN',
-  git: 'https://github.com/zodern/meteor-cdn',
+  git: 'https://github.com/StorytellerCZ/meteor-cdn',
   documentation: 'README.md'
 })
 
@@ -19,7 +19,7 @@ Package.onUse(function (api) {
 
 Package.onTest(function (api) {
   api.use('tinytest')
-  api.use('zodern:cdn')
+  api.use('storyteller:cdn')
   api.addFiles('tests/client.js', 'client')
   api.addFiles('tests/server.js', 'server')
 
