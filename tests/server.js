@@ -257,7 +257,8 @@ Tinytest.add(
     var status;
     var cdn = "https://www.cloudfront.com/";
     var root = "http://www.meteor.com/";
-    var staticUrl = cdn + "packages/underscore.js";
+    // use a package that's most likely installed
+    var staticUrl = cdn + "packages/tinytest.js";
 
     CONTROLLER._setRootUrl(root)
     CONTROLLER._setCdnUrl(cdn);
