@@ -1,5 +1,4 @@
-var url = Npm.require("url");
-var path = Npm.require("path");
+import url from 'url';
 
 
 CONTROLLER = new CDN._controllerClass();
