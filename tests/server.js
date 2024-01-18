@@ -372,4 +372,36 @@ Tinytest.add(
 
 
 
+// Scenario: CSS file is requested
+// CSS files should not be processed by the CDN module
+Tinytest.add(
+    'Server Side - CSS Files - By default NOT served from CDN',
+    function (test) {
+        var cdn = "http://www.cloudfront.com/";
+        var root = "http://www.meteor.com/";
+        var style = "packages/test-in-browser/driver.css";
 
+        CONTROLLER._setRootUrl(root);
+        CONTROLLER._setCdnUrl(cdn);
+
+        // Simulate request for the CSS file
+        var cssUrl = root + style;
+        req.url = cssUrl;
+        req.headers.host = url.parse(root).host;
+        res.headers = {};
+
+        CONTROLLER._static404connectHandler(req, res, next);
+
+        // Check that the CSS file exists and is served from the ROOT URL
+        test.equal(req.url, cssUrl, "CSS file should be served from ROOT URL");
+        test.equal(res.status, 200, "Expecting a 200 response for CSS file from ROOT URL");
+
+        // Check that the CSS url is NOT rewritten by the CDN
+        var assetPath = "/" + style;
+        var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+        test.equal(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to return the CSS file path');
+        test.notEqual(cdnProcessedUrl, cdn + assetPath, 'Expecting the CSS file URL to not be equal to CDN URL + CSS file path');
+
+        resetState();
+    }
+);
