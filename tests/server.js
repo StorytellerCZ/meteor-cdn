@@ -375,7 +375,7 @@ Tinytest.add(
 // Scenario: CSS file is requested
 // CSS files should not be processed by the CDN module
 Tinytest.add(
-    'Server Side - CSS Files - By default NOT served from CDN',
+    'Server Side - CSS Files - NOT served from CDN by default',
     function (test) {
         var cdn = "http://www.cloudfront.com/";
         var root = "http://www.meteor.com/";
@@ -401,6 +401,170 @@ Tinytest.add(
         var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
         test.equal(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to return the CSS file path');
         test.notEqual(cdnProcessedUrl, cdn + assetPath, 'Expecting the CSS file URL to not be equal to CDN URL + CSS file path');
+
+        resetState();
+    }
+);
+
+
+
+// Scenario: CSS file is requested
+// CSS files should be processed by the CDN module if the configuration is changed to allow it
+Tinytest.add(
+    'Server Side - CSS Files - Served from CDN when not in the exclusion list',
+    function (test) {
+        var cdn = "http://www.cloudfront.com/";
+        var root = "http://www.meteor.com/";
+        var style = "packages/test-in-browser/driver.css";
+
+        CONTROLLER._setRootUrl(root);
+        CONTROLLER._setCdnUrl(cdn);
+
+        // Let's start with the default configuration
+
+        // Simulate a request for a CSS file
+        var cssUrl = root + style;
+        req.url = cssUrl;
+        req.headers.host = url.parse(root).host;
+        res.headers = {};
+
+        CONTROLLER._static404connectHandler(req, res, next);
+
+        // Check that the CSS file is served from the ROOT URL
+        test.equal(req.url, cssUrl, "CSS file should be served from ROOT URL");
+        test.equal(res.status, 200, "Expecting a 200 response for CSS file from ROOT URL");
+
+        // Check that the CSS url is NOT rewritten by the CDN
+        var assetPath = "/" + style;
+        function checkThatCssUrlIsNotRewrittenByCDN() {
+            var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+            test.equal(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to return the CSS file path');
+            test.notEqual(cdnProcessedUrl, cdn + assetPath, 'Expecting the CSS file URL to not be equal to CDN URL + CSS file path');
+        }
+
+        checkThatCssUrlIsNotRewrittenByCDN();
+
+        // Remove all exclusions
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: [] } });
+
+        // Check that the CSS url is being rewritten by the CDN
+        function checkThatCssUrlIsBeingRewrittenByCDN() {
+            var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+            test.notEqual(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to NOT return just the CSS file path');
+            test.equal(cdnProcessedUrl, cdn + assetPath, 'Expecting the CSS file URL to be equal to CDN URL + CSS file path');
+        }
+
+        checkThatCssUrlIsBeingRewrittenByCDN();
+
+        // Add the exclusion back and check that the CSS url is again NOT rewritten by the CDN
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: ['.css'] } });
+        checkThatCssUrlIsNotRewrittenByCDN();
+
+        // Remove all exclusions using boolean, then check that the CSS url is once again rewritten by the CDN
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: false } });
+        checkThatCssUrlIsBeingRewrittenByCDN();
+
+        // Use a string configuration value and check that the CSS url is again NOT rewritten by the CDN
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: '.css' } });
+        checkThatCssUrlIsNotRewrittenByCDN();
+
+        resetState();
+    }
+);
+
+
+
+// Scenario: JS file is requested
+// JS files should not be processed by the CDN module
+Tinytest.add(
+    'Server Side - JS Files - Served from CDN by default',
+    function (test) {
+        var cdn = "http://www.cloudfront.com/";
+        var root = "http://www.meteor.com/";
+        var jsFile = "packages/tinytest.js";
+
+        CONTROLLER._setRootUrl(root);
+        CONTROLLER._setCdnUrl(cdn);
+
+        // Simulate a request for a JS file
+        var jsUrl = cdn + jsFile;
+        req.url = jsUrl;
+        req.headers.host = url.parse(root).host;
+        res.headers = {};
+
+        CONTROLLER._static404connectHandler(req, res, next);
+
+        // Check that the JS file exists and is served from the ROOT URL
+        test.equal(req.url, jsUrl, "JS file should be served from ROOT URL");
+        test.equal(res.status, 200, "Expecting a 200 response for JS file from ROOT URL");
+
+        // Check that the JS url is NOT rewritten by the CDN
+        var assetPath = "/" + jsFile;
+        var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+        test.notEqual(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to NOT return the JS file path');
+        test.equal(cdnProcessedUrl, cdn + assetPath, 'Expecting the JS file URL to be equal to CDN URL + JS file path');
+
+        resetState();
+    }
+);
+
+
+
+// Scenario: JS file is requested
+// JS files should NOT be processed by the CDN module if the configuration is changed to exclude it
+Tinytest.add(
+    'Server Side - JS Files - NOT served from CDN when in the exclusion list',
+    function (test) {
+        var cdn = "http://www.cloudfront.com/";
+        var root = "http://www.meteor.com/";
+        var jsFile = "packages/tinytest.js";
+
+        CONTROLLER._setRootUrl(root);
+        CONTROLLER._setCdnUrl(cdn);
+
+        // Let's start with the default configuration
+
+        // Simulate a request for a JS file
+        var jsUrl = root + jsFile;
+        req.url = jsUrl;
+        req.headers.host = url.parse(root).host;
+        res.headers = {};
+
+        CONTROLLER._static404connectHandler(req, res, next);
+
+        // Check that the JS file is served from the ROOT URL
+        test.equal(req.url, jsUrl, "JS file should be served from ROOT URL");
+        test.equal(res.status, 200, "Expecting a 200 response for JS file from ROOT URL");
+
+        // Check that the JS url is being rewritten by the CDN
+        var assetPath = "/" + jsFile;
+        function checkThatJsUrlIsBeingRewrittenByCDN() {
+            var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+            test.notEqual(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to NOT return just the JS file path');
+            test.equal(cdnProcessedUrl, cdn + assetPath, 'Expecting the JS file URL to be equal to CDN URL + JS file path');
+        }
+
+        checkThatJsUrlIsBeingRewrittenByCDN();
+
+        // Add exclusion
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: ['.js'] } });
+
+        // Check that the JS url is NOT rewritten by the CDN
+        function checkThatJsUrlIsNotRewrittenByCDN() {
+            var cdnProcessedUrl = CONTROLLER._processAssetPath(cdn, assetPath);
+            test.equal(cdnProcessedUrl, assetPath, 'Expecting the CDN controller to return the JS file path');
+            test.notEqual(cdnProcessedUrl, cdn + assetPath, 'Expecting the JS file URL to not be equal to CDN URL + JS file path');
+        }
+
+        checkThatJsUrlIsNotRewrittenByCDN();
+
+        // Remove all exclusions using boolean, then check that the JS url is once again rewritten by the CDN
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: false } });
+        checkThatJsUrlIsBeingRewrittenByCDN();
+
+        // Use a string configuration value and check that the JS url is again NOT rewritten by the CDN
+        CONTROLLER._configureExclusions({ assets: { excludeExtensions: '.js' } });
+        checkThatJsUrlIsNotRewrittenByCDN();
 
         resetState();
     }
