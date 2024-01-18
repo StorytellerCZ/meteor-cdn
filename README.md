@@ -9,7 +9,7 @@ Fork of [nitrolabs/meteor-cdn](https://github.com/nitrolabs/meteor-cdn/) with tw
 with [mup-cloud-front](https://github.com/zodern/mup-cloud-front):
 
 - Appends `CDN_URL` with a deployment version if available
-- Does not use the CDN for css files. [See below](#configure-exclusions) how to configure
+- Does not use the CDN for css files by default. [See below](#configure-exclusions) how to configure
 
 Following that this was forked from [zodern/meteor-cdn](https://github.com/zodern/meteor-cdn) which has removed the
 Blaze helper.
