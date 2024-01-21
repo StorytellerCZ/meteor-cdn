@@ -19,6 +19,7 @@ Package.onUse(function (api) {
 
 Package.onTest(function (api) {
   api.use('tinytest')
+  api.use('ecmascript')
   api.use('storyteller:cdn')
   api.addFiles('tests/client.js', 'client')
   api.addFiles('tests/server.js', 'server')

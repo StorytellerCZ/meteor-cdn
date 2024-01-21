@@ -9,7 +9,7 @@ Fork of [nitrolabs/meteor-cdn](https://github.com/nitrolabs/meteor-cdn/) with tw
 with [mup-cloud-front](https://github.com/zodern/mup-cloud-front):
 
 - Appends `CDN_URL` with a deployment version if available
-- Does not use the CDN for css files.
+- Does not use the CDN for css files by default. [See below](#configure-exclusions) how to configure
 
 Following that this was forked from [zodern/meteor-cdn](https://github.com/zodern/meteor-cdn) which has removed the
 Blaze helper.
@@ -41,6 +41,37 @@ CDN exposes function which can be used to get current CDN address.
 
 ```javascript
 CDN.get_cdn_url()
+```
+
+### Configure exclusions
+
+By default, files with the `.css` extension are not served via the CDN. The behaviour was required
+by `mup-cloud-front`, which this package was modified to support. More on that in the `mup-cloud-front`
+[readme](https://github.com/zodern/mup-cloud-front#why).
+
+Also, some project may not have any css files at all, i.e. when using `styled-components`.
+
+To enable serving files having the `.css` extension, use a configuration like this:
+
+```js
+// Cancel all exclusions
+CDN.config({
+  assets: {
+    excludeExtensions: false
+    // alternative option
+    // excludeExtensions: []
+  }
+})
+```
+
+You may decide to exclude other file extensions instead. You can do it like this:
+```js
+// Custom exclusions
+CDN.config({
+  assets: {
+    excludeExtensions: ['js']
+  }
+})
 ```
 
 ### Modifying headers to allow caching of public files
