@@ -1,6 +1,6 @@
 Package.describe({
   name: 'storyteller:cdn',
-  version: '2.0.2',
+  version: '2.1.1',
   summary: 'Serve Meteor content from a CDN',
   git: 'https://github.com/StorytellerCZ/meteor-cdn.git',
   documentation: 'README.md'
