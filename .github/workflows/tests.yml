@@ -16,6 +16,7 @@ jobs:
       matrix:
         meteorRelease:
           - '--release 2.8.1'
+          - '--release 3.0.2'
           # Latest version
           -
     steps:
