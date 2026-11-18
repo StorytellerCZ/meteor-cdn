@@ -7,7 +7,7 @@ Package.describe({
 })
 
 Package.onUse(function (api) {
-  api.versionsFrom(['2.8.0', '3.0'])
+  api.versionsFrom(['2.8.0', '3.0', '3.5.5', '3.6.1'])
   api.export('CDN', 'server')
   api.export('CDN', 'client')
   api.use(['webapp', 'url'], 'server')
