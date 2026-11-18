@@ -196,18 +196,13 @@ Please make sure all tests pass before submitting a pull request:
 meteor test-packages ./
 ```
 
-License
-------
-
-MIT
-
-## URL parsing tests
-
-Run the server URL parsing regressions with Node.js 22 or newer. No npm
-installation or running Meteor app is required:
+The server URL parsing regressions run with Node.js 22 or newer, without npm or a running Meteor app:
 
 ```sh
 node --test tests/node/server.test.mjs
 ```
 
-The existing Tinytest suite also runs through the Meteor CI matrix.
+License
+------
+
+MIT

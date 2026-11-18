@@ -41,7 +41,8 @@ describe('CDN URL handling', () => {
     const { controller } = loadCdn()
     assert.equal(controller._validateSettings('https://example.com', 'https://cdn.example.com'), true)
     assert.equal(controller._validateSettings('https://EXAMPLE.com', 'https://example.com'), false)
-    assert.throws(() => controller._validateSettings('example.com', 'https://cdn.example.com'), /Invalid URL/)
+    assert.throws(() => controller._validateSettings('example.com', 'https://cdn.example.com'), /ROOT_URL is not a valid URL/)
+    assert.throws(() => controller._validateSettings('https://example.com', 'cdn.example.com'), /CDN_URL is not a valid URL/)
     assert.throws(() => controller._validateSettings('https://example.com', 'ftp://cdn.example.com'), /http or https/)
   })
 
@@ -66,6 +67,11 @@ describe('CDN URL handling', () => {
     for (const [host, url, status] of [
       ['cdn.example.com', '/app.js?v=1', undefined],
       ['cdn.example.com', '/missing.js', 404],
+      // Meteor doesn't normalise these, so they must not match /app.js
+      ['cdn.example.com', '/x/../app.js', 404],
+      ['cdn.example.com', '/%2e%2e/app.js', 404],
+      ['cdn.example.com', '//cdn.example.com/app.js', 404],
+      ['cdn.example.com', 'https://cdn.example.com/app.js?v=1', undefined],
       ['example.com', '/story/a', undefined],
     ]) {
       const res = response()
@@ -77,6 +83,17 @@ describe('CDN URL handling', () => {
       } else {
         assert.equal(next.mock.callCount(), 1)
       }
+    }
+  })
+
+  it('recognises CDN Host headers with an explicit default port', () => {
+    const { controller } = loadCdn({ ROOT_URL: 'https://example.com', CDN_URL: 'https://cdn.example.com:443' })
+    for (const host of ['cdn.example.com:443', 'cdn.example.com', 'CDN.example.com']) {
+      const res = response()
+      const next = mock.fn()
+      controller._static404connectHandler({ url: '/missing.js', headers: { host } }, res, next)
+      assert.deepEqual(Array.from(res.writeHead.mock.calls[0].arguments), [404])
+      assert.equal(next.mock.callCount(), 0)
     }
   })
 

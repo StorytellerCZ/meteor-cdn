@@ -70,7 +70,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootInvalid2,cdnValid);
-    }, "Invalid URL");
+    }, "ROOT_URL is not a valid URL");
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid1);
@@ -78,7 +78,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid2);
-    }, "Invalid URL");
+    }, "CDN_URL is not a valid URL");
     resetState();
   }
 );
