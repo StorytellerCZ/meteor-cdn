@@ -1,4 +1,4 @@
-import url from 'url';
+import { URL } from 'meteor/url';
 
 
 CONTROLLER = new CDN._controllerClass();
@@ -70,7 +70,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootInvalid2,cdnValid);
-    }, "ROOT_URL must use http or https protocol, not null");
+    }, "ROOT_URL is not a valid URL");
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid1);
@@ -78,7 +78,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid2);
-    }, "CDN_URL must use http or https protocol, not null");
+    }, "CDN_URL is not a valid URL");
     resetState();
   }
 );
@@ -204,7 +204,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = cdn;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.nextCalls = nextCalls;
 
     CONTROLLER._static404connectHandler(req,res,next);
@@ -230,7 +230,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = staticUrl1;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.nextCalls = nextCalls;
 
     CONTROLLER._static404connectHandler(req,res,next);
@@ -264,7 +264,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = staticUrl;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.status = 200;
     res.nextCalls = nextCalls;
 
@@ -297,7 +297,7 @@ Tinytest.add(
     CONTROLLER._setRootUrl(root)
     CONTROLLER._setCdnUrl(cdn);
 
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.status = 200;
 
     for (var i=1; i<fonts.length; i++){
@@ -333,7 +333,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = font
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.headers = {};
 
     CONTROLLER._CORSConnectHandler(req,res,next);
@@ -360,7 +360,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = filepath;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.headers = {};
 
     CONTROLLER._CORSConnectHandler(req,res,next);
@@ -387,7 +387,7 @@ Tinytest.add(
         // Simulate request for the CSS file
         var cssUrl = root + style;
         req.url = cssUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -425,7 +425,7 @@ Tinytest.add(
         // Simulate a request for a CSS file
         var cssUrl = root + style;
         req.url = cssUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -489,7 +489,7 @@ Tinytest.add(
         // Simulate a request for a JS file
         var jsUrl = cdn + jsFile;
         req.url = jsUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -527,7 +527,7 @@ Tinytest.add(
         // Simulate a request for a JS file
         var jsUrl = root + jsFile;
         req.url = jsUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -568,4 +568,148 @@ Tinytest.add(
 
         resetState();
     }
+);
+
+
+
+// Scenario: ROOT_URL and CDN_URL point to the same host
+// Hosts are compared case-insensitively, so the CDN cannot be detected
+Tinytest.add(
+  'Server Side - CDN._validateSettings - same host',
+  function (test) {
+    var result = CONTROLLER._validateSettings("https://WWW.meteor.com/", "https://www.meteor.com/cdn/");
+    test.isFalse(result, "validateSettings should return False if both URLs share a host");
+    resetState();
+  }
+);
+
+
+
+// Scenario: Galaxy deployment
+// Rewritten asset URLs get the Galaxy version appended for cache busting
+Tinytest.add(
+  'Server Side - Asset Paths - Galaxy version query',
+  function (test) {
+    var cdn = "https://www.cloudfront.com";
+    var original = process.env.GALAXY_APP_VERSION_ID;
+    // Earlier tests change the exclusions, so restore the .css default
+    CONTROLLER._configureExclusions({ assets: { excludeExtensions: ['.css'] } });
+    process.env.GALAXY_APP_VERSION_ID = "v1";
+    try {
+      test.equal(CONTROLLER._processAssetPath(cdn, "/app.js"), cdn + "/app.js?_g_app_v_=v1");
+      test.equal(CONTROLLER._processAssetPath(cdn, "/app.js?v=2"), cdn + "/app.js?v=2&_g_app_v_=v1");
+      test.equal(CONTROLLER._processAssetPath(cdn, "/app.css?v=2"), "/app.css?v=2", "Excluded files should not be rewritten");
+    } finally {
+      if (original === undefined) {
+        delete process.env.GALAXY_APP_VERSION_ID;
+      } else {
+        process.env.GALAXY_APP_VERSION_ID = original;
+      }
+    }
+    resetState();
+  }
+);
+
+
+
+// Scenario: font is requested with a relative URL and querystring
+// Node passes request paths, not absolute URLs, to the handlers
+Tinytest.add(
+  'Server Side - Font Headers - Relative font URL',
+  function (test) {
+    req.url = "/fonts/icomoon.woff2?v=1";
+    req.headers.host = "www.cloudfront.com";
+    res.headers = {};
+    res.nextCalls = nextCalls;
+
+    CONTROLLER._CORSConnectHandler(req,res,next);
+    test.equal(res.headers['Access-Control-Allow-Origin'], '*', 'Missing ACAO Header');
+    test.equal(nextCalls-res.nextCalls,1);
+    resetState();
+  }
+);
+
+
+
+// Scenario: a static file is requested from the CDN through a path Meteor does not normalise
+// Meteor looks up static files by the raw path, so these must not match a real static file
+Tinytest.add(
+  'Server Side - CDN Serving - Return 404 for unnormalised static paths',
+  function (test) {
+    var cdn = "https://www.cloudfront.com/";
+    var root = "http://www.meteor.com/";
+    CONTROLLER._setRootUrl(root);
+    CONTROLLER._setCdnUrl(cdn);
+    req.headers.host = "www.cloudfront.com";
+
+    req.url = "/packages/tinytest.js?v=1";
+    res.status = 200;
+    res.nextCalls = nextCalls;
+    CONTROLLER._static404connectHandler(req,res,next);
+    test.equal(res.status,200);
+    test.equal(nextCalls-res.nextCalls,1);
+
+    var paths = [
+      "/x/../packages/tinytest.js",
+      "/%2e%2e/packages/tinytest.js",
+      "//www.cloudfront.com/packages/tinytest.js"
+    ];
+    for (var i=0; i<paths.length; i++){
+      req.url = paths[i];
+      res.status = 200;
+      res.nextCalls = nextCalls;
+      CONTROLLER._static404connectHandler(req,res,next);
+      test.equal(res.status,404,paths[i]);
+      test.equal(nextCalls,res.nextCalls);
+    }
+    resetState();
+  }
+);
+
+
+
+// Scenario: CDN_URL contains an explicit default port
+// The Host header is normalised the same way, with or without the port
+Tinytest.add(
+  'Server Side - CDN Serving - Default port in CDN_URL',
+  function (test) {
+    CONTROLLER._setRootUrl("http://www.meteor.com/");
+    CONTROLLER._setCdnUrl("https://www.cloudfront.com:443/");
+    req.url = "/missing.js";
+
+    var hosts = ["www.cloudfront.com:443", "www.cloudfront.com", "WWW.cloudfront.com"];
+    for (var i=0; i<hosts.length; i++){
+      req.headers.host = hosts[i];
+      res.status = 200;
+      res.nextCalls = nextCalls;
+      CONTROLLER._static404connectHandler(req,res,next);
+      test.equal(res.status,404,hosts[i]);
+      test.equal(nextCalls,res.nextCalls);
+    }
+    resetState();
+  }
+);
+
+
+
+// Scenario: a malformed URL is requested
+// Handlers should respond with 400 instead of throwing
+Tinytest.add(
+  'Server Side - Malformed request URL - Return 400',
+  function (test) {
+    CONTROLLER._setRootUrl("http://www.meteor.com/");
+    CONTROLLER._setCdnUrl("https://www.cloudfront.com/");
+    req.url = "http://[invalid";
+    req.headers.host = "www.cloudfront.com";
+
+    var handlers = [CONTROLLER._CORSConnectHandler, CONTROLLER._static404connectHandler];
+    for (var i=0; i<handlers.length; i++){
+      res.status = 200;
+      res.nextCalls = nextCalls;
+      handlers[i](req,res,next);
+      test.equal(res.status,400);
+      test.equal(nextCalls,res.nextCalls);
+    }
+    resetState();
+  }
 );
