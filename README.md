@@ -200,3 +200,14 @@ License
 ------
 
 MIT
+
+## URL parsing tests
+
+Run the server URL parsing regressions with Node.js 22 or newer. No npm
+installation or running Meteor app is required:
+
+```sh
+node --test tests/node/server.test.mjs
+```
+
+The existing Tinytest suite also runs through the Meteor CI matrix.

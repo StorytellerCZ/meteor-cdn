@@ -1,4 +1,4 @@
-import url from 'url';
+import { URL } from 'url';
 
 
 CONTROLLER = new CDN._controllerClass();
@@ -70,7 +70,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootInvalid2,cdnValid);
-    }, "ROOT_URL must use http or https protocol, not null");
+    }, "Invalid URL");
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid1);
@@ -78,7 +78,7 @@ Tinytest.add(
 
     test.throws(function(){
       CONTROLLER._validateSettings(rootValid,cdnInvalid2);
-    }, "CDN_URL must use http or https protocol, not null");
+    }, "Invalid URL");
     resetState();
   }
 );
@@ -204,7 +204,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = cdn;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.nextCalls = nextCalls;
 
     CONTROLLER._static404connectHandler(req,res,next);
@@ -230,7 +230,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = staticUrl1;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.nextCalls = nextCalls;
 
     CONTROLLER._static404connectHandler(req,res,next);
@@ -264,7 +264,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = staticUrl;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.status = 200;
     res.nextCalls = nextCalls;
 
@@ -297,7 +297,7 @@ Tinytest.add(
     CONTROLLER._setRootUrl(root)
     CONTROLLER._setCdnUrl(cdn);
 
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.status = 200;
 
     for (var i=1; i<fonts.length; i++){
@@ -333,7 +333,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = font
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.headers = {};
 
     CONTROLLER._CORSConnectHandler(req,res,next);
@@ -360,7 +360,7 @@ Tinytest.add(
     CONTROLLER._setCdnUrl(cdn);
 
     req.url = filepath;
-    req.headers.host = url.parse(cdn).host;
+    req.headers.host = new URL(cdn).host;
     res.headers = {};
 
     CONTROLLER._CORSConnectHandler(req,res,next);
@@ -387,7 +387,7 @@ Tinytest.add(
         // Simulate request for the CSS file
         var cssUrl = root + style;
         req.url = cssUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -425,7 +425,7 @@ Tinytest.add(
         // Simulate a request for a CSS file
         var cssUrl = root + style;
         req.url = cssUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -489,7 +489,7 @@ Tinytest.add(
         // Simulate a request for a JS file
         var jsUrl = cdn + jsFile;
         req.url = jsUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);
@@ -527,7 +527,7 @@ Tinytest.add(
         // Simulate a request for a JS file
         var jsUrl = root + jsFile;
         req.url = jsUrl;
-        req.headers.host = url.parse(root).host;
+        req.headers.host = new URL(root).host;
         res.headers = {};
 
         CONTROLLER._static404connectHandler(req, res, next);

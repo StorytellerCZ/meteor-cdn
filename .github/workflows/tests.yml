@@ -10,6 +10,18 @@ on:
   pull_request:
 
 jobs:
+  url-regressions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test tests/node/server.test.mjs
+
   test:
     runs-on: ubuntu-latest
     strategy:
