@@ -196,12 +196,6 @@ Please make sure all tests pass before submitting a pull request:
 meteor test-packages ./
 ```
 
-The server URL parsing regressions run with Node.js 22 or newer, without npm or a running Meteor app:
-
-```sh
-node --test tests/node/server.test.mjs
-```
-
 License
 ------
 
