@@ -1,5 +1,4 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# Runs the package's Tinytest suite with mtest across the supported Meteor releases
 
 name: Test suite
 
@@ -15,19 +14,21 @@ jobs:
     strategy:
       matrix:
         meteorRelease:
-          - '--release 2.8.1'
-          - '--release 3.0.2'
-          - '--release 3.5.4'
+          # Oldest supported releases (package.js versionsFrom), last 2.x and previous 3.x minor
+          - '--release 2.8.2'
+          - '--release 2.16'
+          - '--release 3.0.4'
+          - '--release 3.5.5'
           # Latest version
           -
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: '22.x'
+          node-version: '26.x'
 
       - name: Install Dependencies
         run: |
@@ -37,4 +38,4 @@ jobs:
       - name: Run Tests
         run: |
           # Retry tests since some of them are flaky
-          mtest --package ./ --once ${{ matrix.meteorRelease }} || mtest --package ./ --once ${{ matrix.meteorRelease }} 
+          mtest --package ./ --once ${{ matrix.meteorRelease }} || mtest --package ./ --once ${{ matrix.meteorRelease }}
