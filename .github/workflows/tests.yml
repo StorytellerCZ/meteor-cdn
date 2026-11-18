@@ -34,6 +34,7 @@ jobs:
         meteorRelease:
           - '--release 2.8.1'
           - '--release 3.0.2'
+          - '--release 3.5.4'
           # Latest version
           -
     steps:
@@ -43,7 +44,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
+          node-version: '22.x'
 
       - name: Install Dependencies
         run: |
