@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { URL } from 'meteor/url';
 
 
 CONTROLLER = new CDN._controllerClass();

@@ -11,6 +11,7 @@ Package.onUse(function (api) {
   api.export('CDN', 'server')
   api.export('CDN', 'client')
   api.use('webapp', 'server')
+  api.use('url', 'server')
   api.use('browser-policy', { weak: true })
   api.use('ecmascript')
   api.addFiles('lib/client.js', 'client')
@@ -21,6 +22,7 @@ Package.onTest(function (api) {
   api.use('tinytest')
   api.use('ecmascript')
   api.use('storyteller:cdn')
+  api.use('url', 'server')
   api.addFiles('tests/client.js', 'client')
   api.addFiles('tests/server.js', 'server')
 
